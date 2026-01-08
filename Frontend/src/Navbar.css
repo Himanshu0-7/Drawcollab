@@ -17,8 +17,7 @@
 .Navbar h1{
     margin: 0;
   font-family: 'Title Font';
-  margin-right: 100px;
-  margin-left: 20px;
+  padding-left: 20px;
   color: rgb(160, 160, 160);
 }
 
@@ -26,15 +25,15 @@
   position: relative;
    font-family: "Poppins Font_medium";
   font-size: 1rem;
-  background-color: rgba(0, 41, 48, 0.233);
-  border: 1px solid white;
+  background-color: rgb(0, 41, 48);
+  border: 1px solid black;
   color: white;
   width: 100px;
   border-radius: 10px;
   height: 40px;
   overflow: hidden;
-  margin-right: 20px;
   z-index: 1;
+  margin-right: 20px;
   letter-spacing: 2px;
 }
 #share-button::before{
@@ -51,38 +50,6 @@
   transform: scaleX(1);
 }
 #share-button:hover{
-  color: black;
-
-}
-#login-button{
-  position: relative;
-   font-family: "Poppins Font_medium";
-  font-size: 1rem;
-  background-color: rgba(0, 41, 48, 0.233);
-  border: 1px solid white;
-  color: white;
-  width: 100px;
-  border-radius: 10px;
-  height: 40px;
-  overflow: hidden;
-  margin-right: 20px;
-  z-index: 1;
-  letter-spacing: 2px;
-}
-#login-button::before{
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-color: white;
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform .4s ease;
-  z-index: -1;
-}
-#login-button:hover::before{
-  transform: scaleX(1);
-}
-#login-button:hover{
   color: black;
 
 }

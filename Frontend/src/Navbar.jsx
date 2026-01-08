@@ -1,22 +1,22 @@
-import { use, useState } from 'react';
-import './Navbar.css'
+import "./Navbar.css";
+import Tool from "./Tool";
 
-const Navbar=({shareBtn})=>{
-
-    return(
-        <>
-            <nav className="Navbar">
+const Navbar = ({ shareBtn, setActiveTool, ActiveTool }) => {
+  return (
+    <>
+      <nav className="Navbar">
         {/* <div> */}
         <h1>Websocket Test</h1>
+        <Tool setActiveTool={setActiveTool} ActiveTool={ActiveTool}></Tool>
         <div>
-
-        <button id='share-button' onClick={shareBtn}>Share</button>
+          <button id="share-button" onClick={shareBtn}>
+            Share
+          </button>
         </div>
-        </nav>
-        {/* </div> */}
-        </>
-    )
+      </nav>
+      {/* </div> */}
+    </>
+  );
+};
 
-}
-
-export default Navbar
+export default Navbar;

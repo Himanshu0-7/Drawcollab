@@ -3,6 +3,7 @@ import Home from "./Home";
 import { Route, Routes } from "react-router-dom";
 import Room from "./Room";
 import'./Shared.css'
+import { useState } from "react";
 function App() {
   // const send = () => {
   //   if (!text || !wsRef.current) return;
@@ -21,7 +22,7 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Home/>} />
+        <Route path="/" element={<Home />} />
         <Route
           path="/room/:roomId"
           element={<Room/>}
