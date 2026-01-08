@@ -2,18 +2,18 @@ import { Fragment } from "react";
 import { Arrow, Circle, Ellipse, Rect } from "react-konva";
 
 const RenderShape = ({ shape, RegisterRef, isPreview, transformerRef }) => {
-  console.log(shape);
   switch (shape.type) {
     case "rect":
       return (
         <Rect
-          key={shape.id}
           {...shape}
-          ref={isPreview ? undefined : (node) => RegisterRef(shape.id, node)}
+          ref={(node) => {
+            RegisterRef(shape.id, node);
+          }}
           onClick={() => {
             transformerRef(shape.id);
           }}
-          stroke={isPreview ? "black" : "black"}
+          stroke={"black"}
           strokeWidth={1}
           draggable
         />
@@ -21,9 +21,8 @@ const RenderShape = ({ shape, RegisterRef, isPreview, transformerRef }) => {
     case "elipse":
       return (
         <Ellipse
-          key={shape.id}
           {...shape}
-          ref={isPreview ? undefined : (node) => RegisterRef(shape.id, node)}
+          ref={(node) => RegisterRef(shape.id, node)}
           onClick={() => {
             transformerRef(shape.id);
           }}
@@ -35,9 +34,8 @@ const RenderShape = ({ shape, RegisterRef, isPreview, transformerRef }) => {
     case "arrow":
       return (
         <Arrow
-          key={shape.id}
           {...shape}
-          ref={isPreview ? undefined : (node) => RegisterRef(shape.id, node)}
+          ref={(node) => RegisterRef(shape.id, node)}
           onClick={() => {
             transformerRef(shape.id);
           }}

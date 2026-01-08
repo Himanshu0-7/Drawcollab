@@ -1,10 +1,15 @@
 import { useRef, useState, Fragment, useEffect } from "react";
 import { Stage, Layer, Rect, Transformer } from "react-konva";
 import RenderShape from "./RenderShape";
+import Konva from "konva";
+import { shapes } from "konva/lib/Shape";
 
 const Canvas = ({ ActiveTool }) => {
   const [Shapes, setShapes] = useState([]);
-  const [PreveiwShapes, setPreviewShapes] = useState([]);
+  // const [pendingid, setPendingid] = useState(null)
+  const pendingidRef = useRef(null);
+  const previewNodeRef = useRef(null);
+  const layerRef = useRef(null);
   const [isPreview, setIsPreview] = useState(false);
   const startPos = useRef(null);
   const shapeRef = useRef({});
@@ -13,6 +18,18 @@ const Canvas = ({ ActiveTool }) => {
   const isShiftPressed = useRef(false);
   const lastPos = useRef(null);
   const ActiveToolRef = useRef(null);
+  useEffect(() => {
+    const id = pendingidRef.current;
+    if (!id) return;
+
+    const node = shapeRef.current[id];
+    if (!node) return; 
+
+    trRef.current.nodes([node]);
+    trRef.current.getLayer().batchDraw();
+
+    pendingidRef.current = null; // consume
+  }, [Shapes]);
 
   useEffect(() => {
     ActiveToolRef.current = ActiveTool;
@@ -41,14 +58,21 @@ const Canvas = ({ ActiveTool }) => {
   const RegisterRef = (id, node) => {
     if (node) {
       shapeRef.current[id] = node;
+      // console.log("refs:", shapeRef.current);
     } else {
       delete shapeRef.current[id];
     }
   };
 
   const transformerRef = (id) => {
-    trRef.current.nodes([shapeRef.current[id]]);
+    const node = shapeRef.current[id];
+    if (!node) return;
+
+    trRef.current.nodes([node]);
+    trRef.current.getLayer().batchDraw(); // 🔑 REQUIRED
+    console.log("selected:", trRef.current.nodes());
   };
+
   const handleUpdateShape = () => {
     if (!lastPos.current || !startPos.current) return;
     switch (ActiveToolRef.current) {
@@ -70,44 +94,52 @@ const Canvas = ({ ActiveTool }) => {
     const clickedOnEmpty = e.target === stage;
     if (clickedOnEmpty) {
       trRef.current.nodes([]);
+      trRef.current.getLayer().batchDraw();
     }
     startPos.current = { x: point.x, y: point.y };
     isDrawing.current = true;
     switch (ActiveTool) {
       case "rect":
-        setPreviewShapes({
-          id: crypto.randomUUID(),
-          type: "rect",
+        previewNodeRef.current = new Konva.Rect({
           x: point.x,
           y: point.y,
           width: 0,
           height: 0,
+          stroke: "black",
+          listening: false,
         });
         break;
       case "elipse":
-        setPreviewShapes({
+        previewNodeRef.current = new Konva.Ellipse({
           id: crypto.randomUUID(),
           type: "elipse",
           x: point.x,
           y: point.y,
           radiusX: 0,
           radiusY: 0,
+          stroke: "black",
+          listening: false,
         });
         break;
 
       case "arrow":
-        setPreviewShapes({
+        previewNodeRef.current = new Konva.Arrow({
           id: crypto.randomUUID(),
           type: "arrow",
           points: [point.x, point.y, point.x, point.y],
+          listening: false,
+          stroke: "black",
         });
         break;
     }
+    layerRef.current.add(previewNodeRef.current);
+    layerRef.current.batchDraw();
 
     setIsPreview(true);
   };
   const handleMouseMove = (e) => {
-    if (!isDrawing.current || ActiveTool == "" || !PreveiwShapes) return;
+    if (!isDrawing.current || ActiveTool == "" || !previewNodeRef.current)
+      return;
 
     const stage = e.target.getStage();
     const pos = stage.getPointerPosition();
@@ -127,18 +159,19 @@ const Canvas = ({ ActiveTool }) => {
     }
   };
   const handleRect = (pos, startX, startY) => {
+    if (!previewNodeRef.current) return;
     // if(isShiftPressed.current){
 
     // }
-    setPreviewShapes((prev) => ({
-      ...prev,
-      x: Math.min(pos.x, startX),
-      y: Math.min(pos.y, startY),
+    previewNodeRef.current.setAttrs({
+      x: Math.min(startX, pos.x),
+      y: Math.min(startY, pos.y),
       width: Math.abs(pos.x - startX),
       height: Math.abs(pos.y - startY),
-    }));
+    });
   };
   const handleElipse = (pos, startX, startY) => {
+    if (!previewNodeRef.current) return;
     const dx = pos.x - startX;
     const dy = pos.y - startY;
     const radius = Math.sqrt(dx * dx + dy * dy);
@@ -149,25 +182,38 @@ const Canvas = ({ ActiveTool }) => {
       radiusX = r;
       radiusY = r;
     }
-    setPreviewShapes((prev) => ({
-      ...prev,
+    previewNodeRef.current.setAttrs({
       radius,
       radiusX,
       radiusY,
-    }));
+    });
   };
   const handleArrow = (pos, startX, startY) => {
-    setPreviewShapes((prev) => ({
-      ...prev,
+    if (!previewNodeRef.current) return;
+    previewNodeRef.current.setAttrs({
       points: [startX, startY, pos.x, pos.y],
-    }));
+    });
   };
 
   const handleMouseUp = () => {
-    if (!isDrawing.current || !PreveiwShapes || ActiveTool == "") return;
+    if (!isDrawing.current || !previewNodeRef.current || ActiveTool == "")
+      return;
+    const attrs = previewNodeRef.current.getAttrs();
+    const id = crypto.randomUUID();
 
-    setShapes((prev) => [...prev, PreveiwShapes]);
-    setPreviewShapes(null);
+    setShapes((prev) => [
+      ...prev,
+      {
+        ...attrs,
+        id,
+        type: ActiveTool,
+        draggable: true,
+        listening: true,
+      },
+    ]);
+    pendingidRef.current = id;
+    previewNodeRef.current.destroy();
+    previewNodeRef.current = null;
     setIsPreview(false);
     isDrawing.current = false;
   };
@@ -180,7 +226,7 @@ const Canvas = ({ ActiveTool }) => {
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
     >
-      <Layer>
+      <Layer ref={layerRef}>
         {Shapes.map((shape) => {
           return (
             <RenderShape
@@ -191,9 +237,6 @@ const Canvas = ({ ActiveTool }) => {
             />
           );
         })}
-        {isPreview && PreveiwShapes && (
-          <RenderShape shape={PreveiwShapes} isPreview={isPreview} />
-        )}
         <Transformer
           ref={trRef}
           flipEnabled={false}
