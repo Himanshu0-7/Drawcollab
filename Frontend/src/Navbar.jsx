@@ -1,10 +1,10 @@
 import "./Navbar.css";
 import Tool from "./Tool";
 
-const Navbar = ({ shareBtn, setActiveTool, ActiveTool }) => {
+const Navbar = ({ shareBtn, setActiveTool, ActiveTool, pointerEvent }) => {
   return (
     <>
-      <nav className="Navbar">
+      <nav className="Navbar" style={{ pointerEvents: pointerEvent }}>
         {/* <div> */}
         <h1>Websocket Test</h1>
         <Tool setActiveTool={setActiveTool} ActiveTool={ActiveTool}></Tool>

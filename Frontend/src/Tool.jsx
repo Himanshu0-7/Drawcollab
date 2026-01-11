@@ -103,36 +103,107 @@ const Tool = ({ setActiveTool, ActiveTool }) => {
           onMouseDown={() => {
             setActiveTool("arrow");
           }}
-        > <svg viewBox="-80 -60 160 120" aria-hidden="true">
-            <line
-              x1="-40"
-              y1="-30"
-              y2='40'
-              x2='30'
+        >
+          {" "}
+          <svg viewBox="-80 -60 160 120" aria-hidden="true">
+            <path
+              d="
+           M -49 -49
+           L  49 49
+           M 49 49
+           L 30 44
+           M 49 49
+           L 44 30
+
+           "
               fill="none"
               stroke="black"
               strokeWidth="7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
-            <line
-              x1="30"
-              y1="40"
-              y2='38'
-              x2='0'
+          </svg>
+        </button>
+        <button
+          id="pencil-btn"
+          className={ActiveTool === "pencil" ? "active-pencil" : ""}
+          onMouseDown={() => {
+            setActiveTool("pencil");
+          }}
+        >
+          {" "}
+          <svg viewBox="-80 -60 160 120" aria-hidden="true">
+            <path
+              d="
+
+             
+              M 44 54
+              L -54 -44
+              C -55 -45 -45 -55 -44 -54             
+              L  54 44
+              z
+              M -45 -38 
+              L -38 -48 
+              
+
+           "
               fill="none"
               stroke="black"
-              strokeWidth="7"
+              strokeWidth="5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
-            <line
-              x1="30"
-              y1="40"
-              y2='10'
-              x2='32'
+            <path
+              d="
+              M 54 44
+              L 65 65
+              L 44 54
+              Z
+  "
+              fill="black"
+            />
+          </svg>
+        </button>
+        <button
+          id="eraser-btn"
+          className={ActiveTool === "eraser" ? "active-eraser" : ""}
+          onMouseDown={() => {
+            setActiveTool("eraser");
+          }}
+        >
+          {" "}
+          <svg viewBox="-80 -60 160 120" aria-hidden="true">
+            <path
+              d="
+
+             
+              M 44 54
+              L -54 -44
+              C -55 -45 -45 -55 -44 -54             
+              L  54 44
+              z
+              M -45 -38 
+              L -38 -48 
+              
+
+           "
               fill="none"
               stroke="black"
-              strokeWidth="7"
+              strokeWidth="5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
-            
-          </svg></button>
+            <path
+              d="
+              M 54 44
+              L 65 65
+              L 44 54
+              Z
+  "
+              fill="black"
+            />
+          </svg>
+        </button>
       </div>
     </>
   );

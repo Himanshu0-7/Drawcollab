@@ -1,36 +1,39 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./Cursor.css";
 import gsap from "gsap";
 import { CreateRoom } from "./CreateRoom";
 
-const Cursor = ({ cursors , wsRef}) => {
+const Cursor = ({ cursors, wsRef }) => {
+  const historyRef = useRef([]);
   useEffect(() => {
-    const mousemove = (e) => {
-      gsap.to(".cursordot", {
+    const path = document.querySelector("#tail");
+
+    window.addEventListener("mousemove", (e) => {
+      historyRef.current.unshift({
         x: e.clientX,
         y: e.clientY,
-        duration: .5,
       });
-      wsRef.current?.send(
-        JSON.stringify({
-          x: e.clientX,
-          y: e.clientY,
-        })
-      );
-    };
-    window.addEventListener("mousemove", mousemove);
-    // console.log(roomid);
+      if (historyRef.current.length > 10) {
+        historyRef.current.pop();
+      }
+      const history = historyRef.current;
+      if (history.length < 2) return;
+      const head = history[0];
+      const tail = history[history.length - 1];
 
-    return () => {
-      window.removeEventListener("mousemove", mousemove);
-    };
+  
+  
+      const d = `M ${head.x} ${head.y} L ${tail.x} ${tail.y}`;
+  
+      path.setAttribute("d", d);
+    });
   }, []);
 
   return (
     <>
-      {cursors.map((cursor) => (
-        <div key={cursor.id} id={cursor.id} className="cursordot"></div>
-      ))}
+      <svg width="100%" height="100%" className="cursordot">
+        <path id="tail" stroke="black" fill="none" strokeWidth="10" />
+      </svg>
     </>
   );
 };
