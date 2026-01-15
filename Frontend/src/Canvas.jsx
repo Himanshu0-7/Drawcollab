@@ -24,7 +24,8 @@ const Canvas = ({
   const ActiveToolRef = useRef(null);
   const isErasingRef = useRef(false);
   const erasedIdsRef = useRef(new Set());
-
+  console.log(JSON.stringify(Shapes));
+  console.log(Shapes);
   useEffect(() => {
     if (pendingid.length === 0) return;
 
@@ -92,25 +93,36 @@ const Canvas = ({
 
   const transformerRef = (id) => {
     const node = shapeRef.current[id];
-    shapeRef.current = shapeRef.current[id];
     if (!node) return;
+
+    // ❗ skip deleted shapes
+    const shape = Shapes.find((s) => s.id === id);
+    if (!shape || shape.deleted) return;
 
     trRef.current.nodes([node]);
     trRef.current.getLayer().batchDraw();
   };
 
   const handleDeleteShape = () => {
-    if (trRef.current && shapeRef.current) {
-      const selectedNodes = trRef.current.nodes();
-      if (selectedNodes.length === 0) return;
-      const selectedIds = selectedNodes.map((node) => node.id());
-      setShapes((prev) =>
-        prev.filter((shape) => !selectedIds.includes(shape.id))
-      );
-      trRef.current.nodes([]);
-      trRef.current.getLayer().batchDraw();
-    }
+    if (!trRef.current) return;
+
+    const selectedNodes = trRef.current.nodes();
+    if (selectedNodes.length === 0) return;
+
+    const ids = new Set(selectedNodes.map((node) => node.id()));
+
+    // ✅ SOFT DELETE (Excalidraw-style)
+    setShapes((prev) =>
+      prev.map((shape) =>
+        ids.has(shape.id) ? { ...shape, deleted: true } : shape
+      )
+    );
+
+    // cleanup transformer
+    trRef.current.nodes([]);
+    trRef.current.getLayer()?.batchDraw();
   };
+
   const handleUpdateShape = () => {
     if (!lastPos.current || !startPos.current) return;
     switch (ActiveToolRef.current) {
@@ -317,19 +329,33 @@ const Canvas = ({
     if (!isDrawing.current || !previewNodeRef.current || ActiveTool == "")
       return;
     if (ActiveTool === "eraser") {
-      const idsToDeleteSet = erasedIdsRef.current;
+      // 1️⃣ Restore opacity
+      layerRef.current.find(".shape").forEach((node) => {
+        node.opacity(1);
+      });
 
+      const ids = new Set(erasedIdsRef.current);
+
+      // 2️⃣ Soft delete (Excalidraw-style)
       setShapes((prev) =>
-        prev.filter((shape) => !idsToDeleteSet.has(shape.id))
+        prev.map((shape) =>
+          ids.has(shape.id) ? { ...shape, deleted: true } : shape
+        )
       );
 
-      isErasingRef.current = false;
+      // 3️⃣ Cleanup transformer
+      trRef.current.nodes([]);
+      trRef.current.getLayer()?.batchDraw();
+
+      // 4️⃣ Destroy preview node
+      previewNodeRef.current.destroy();
+      previewNodeRef.current = null;
+
+      // 5️⃣ Reset flags
       erasedIdsRef.current.clear();
-
-      const selectionBox = previewNodeRef.current;
-      selectionBox.visible(false);
-
+      isErasingRef.current = false;
       isDrawing.current = false;
+
       setIsEraserEnable(false);
       setPointerEvent("");
       return;
@@ -367,6 +393,7 @@ const Canvas = ({
         type: ActiveTool,
         draggable: true,
         listening: true,
+        deleted: false,
       },
     ]);
     setPendingid([id]);
@@ -386,7 +413,7 @@ const Canvas = ({
         onMouseUp={handleMouseUp}
       >
         <Layer ref={layerRef}>
-          {Shapes.map((shape) => {
+          {Shapes.filter((s) => !s.deleted).map((shape) => {
             return (
               <RenderShape
                 key={shape.id}

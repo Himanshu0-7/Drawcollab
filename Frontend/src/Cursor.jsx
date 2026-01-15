@@ -8,9 +8,21 @@ const Cursor = ({ isEraserEnable }) => {
   const currentPos = useRef(null);
   const LastPos = useRef(null);
   const trailLengthRef = useRef(0);
+  const rafRef = useRef(null);
 
   useEffect(() => {
-    if (!isEraserEnable) return;
+    if (!isEraserEnable) {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      const path = document.querySelector("#tail");
+      path?.setAttribute("d", "");
+      return;
+    }
+
+    historyRef.current = [];
+    LastPos.current = null;
+    currentPos.current = null;
+    trailLengthRef.current = 0;
+
     const onMove = (e) => {
       currentPos.current = { x: e.clientX, y: e.clientY };
     };
@@ -24,21 +36,25 @@ const Cursor = ({ isEraserEnable }) => {
         const dy = currentPos.current.y - LastPos.current.y;
         speed = Math.hypot(dx, dy);
       }
-      if (currentPos.current) {
+      if (!LastPos.current && currentPos.current) {
+        // first frame after enable → initialize only
         LastPos.current = currentPos.current;
-
-        historyRef.current.unshift({
-          x: currentPos.current.x,
-          y: currentPos.current.y,
-        });
+        rafRef.current = requestAnimationFrame(animate);
+        return;
       }
+
+      if (currentPos.current) {
+        historyRef.current.unshift({ ...currentPos.current });
+        LastPos.current = currentPos.current;
+      }
+
       if (historyRef.current.length > 25) {
         historyRef.current.pop();
       }
       const targetLength = speed * 10;
       trailLengthRef.current += (targetLength - trailLengthRef.current) * 0.25;
       draw();
-      requestAnimationFrame(animate);
+      rafRef.current = requestAnimationFrame(animate);
     };
     const draw = () => {
       const history = historyRef.current;
@@ -149,6 +165,10 @@ const Cursor = ({ isEraserEnable }) => {
 
     return () => {
       window.removeEventListener("mousemove", onMove);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
     };
   }, [isEraserEnable]);
 
