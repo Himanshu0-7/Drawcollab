@@ -24,8 +24,8 @@ const Canvas = ({
   const ActiveToolRef = useRef(null);
   const isErasingRef = useRef(false);
   const erasedIdsRef = useRef(new Set());
-  console.log(JSON.stringify(Shapes));
-  console.log(Shapes);
+  // console.log(JSON.stringify(Shapes));
+  // console.log(Shapes);
   useEffect(() => {
     if (pendingid.length === 0) return;
 
