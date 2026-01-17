@@ -52,7 +52,7 @@ function App() {
         setIsEraserEnable={setIsEraserEnable}
         roomInfo={roomInfo}
       ></Canvas>
-      <Session isloading={isshare}></Session>
+      <Session isloading={isshare} roomInfo={roomInfo}></Session>
     </>
   );
 }

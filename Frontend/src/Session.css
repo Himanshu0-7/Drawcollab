@@ -1,15 +1,14 @@
-.session-container{
-    position: fixed;
-    z-index: 100;
-    display: flex;
-    background: transparent;
-    justify-content: center;
-    align-items: center;
-    top: 0;
-    left: 0;
-
+.session-container {
+  position: fixed;
+  z-index: 100;
+  display: flex;
+  background: transparent;
+  justify-content: center;
+  align-items: center;
+  top: 0;
+  left: 0;
 }
-.Session-overlay{
+.Session-overlay {
   display: flex;
   position: absolute;
   width: 700px;
@@ -21,10 +20,9 @@
   z-index: 1;
   border: 2px solid rgba(255, 255, 255, 0.116);
   border-radius: 20px;
-  box-shadow: 2px 10px  100px 60px rgba(255, 255, 255, 0.055);
-  
+  box-shadow: 2px 10px 100px 60px rgba(255, 255, 255, 0.055);
 }
-.Session-overlay h1{
+.Session-overlay h1 {
   font-family: "Title Font";
   margin: 0;
   margin-top: 20px;
@@ -32,8 +30,78 @@
   margin-bottom: 40px;
   position: relative;
 }
-#session-button{
-    position: relative;
+.roomurl-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 20px;
+}
+.roomurl-overlay {
+  display: flex;
+  flex-direction: column;
+}
+#roomurl-title {
+  font-family: "Poppins Font_regular";
+  color: white;
+  margin-bottom: 10px;
+}
+.room-url {
+  position: relative;
+  display: flex;
+  width: 100%;
+  font-size: 1rem;
+  max-width: 400px; /* adjust as needed */
+  border-radius: 5px;
+  padding: 0 10px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.363);
+  text-overflow: ellipsis;
+}
+.room-url:focus-visible {
+  outline: none;
+  outline: 2px solid white;
+}
+.room-url,
+.copyUrl-btn {
+  box-sizing: border-box;
+}
+
+.copyUrl-btn {
+  position: relative;
+  font-family: "Poppins Font_regular";
+  width: 120px;
+  padding: 0px;
+  font-size: 1rem;
+  height: 40px;
+  border-radius: 5px;
+  border: none;
+  border: 1px solid white;
+  background-color: black;
+  color: white;
+  overflow: hidden;
+  z-index: 1;
+}
+.copyUrl-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: white;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+  z-index: -1;
+}
+.copyUrl-btn:hover::before {
+  transform: scaleX(1);
+}
+.copyUrl-btn:hover {
+  border: 1px solid black;
+  color: black;
+}
+.create-session {
+  position: relative;
   font-family: "Poppins Font_medium";
   width: 150px;
   font-size: 1rem;
@@ -46,23 +114,53 @@
   color: white;
   overflow: hidden;
   z-index: 1;
-  
 }
-#session-button::before{
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-color: white;
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform .4s ease;
-    z-index: -1;
+.create-session::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: white;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+  z-index: -1;
 }
-#session-button:hover::before{
-    transform: scaleX(1);
+.create-session:hover::before {
+  transform: scaleX(1);
 }
-#session-button:hover{
-    border: 1px solid black;
+.create-session:hover {
+  border: 1px solid black;
   color: black;
-
+}
+.remove-session {
+  position: relative;
+  font-family: "Poppins Font_medium";
+  width: 150px;
+  font-size: 1rem;
+  margin-top: 40px;
+  height: 50px;
+  border-radius: 5px;
+  border: none;
+  border: 1px solid white;
+  background-color: black;
+  color: rgb(255, 85, 85);
+  overflow: hidden;
+  z-index: 1;
+}
+.remove-session::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: white;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+  z-index: -1;
+}
+.remove-session:hover::before {
+  transform: scaleX(1);
+}
+.remove-session:hover {
+  border: 1px solid black;
+  color: rgb(255, 85, 85);
 }
