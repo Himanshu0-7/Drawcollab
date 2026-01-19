@@ -1,17 +1,12 @@
 const express = require('express')
 const router = express.Router()
+const roomData = require('../shareMemory')
 
 
-const roomData = new Map();
 router.post('/payload',(req, res) =>{
-    const roomId  = req.query.roomId;
-     const iv = req.body.slice(0, 12)
-  const encryptedData = req.body.slice(12)
-   roomData.set(roomId, {
-  iv,
-  encryptedData
-})
-console.log(roomData)
+  const buffer = req.body
+  console.log(buffer)
+   roomData.set(buffer)
 
     res.status(200).json({ok: true})
 })
