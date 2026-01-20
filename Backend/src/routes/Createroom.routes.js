@@ -5,7 +5,6 @@ const roomData = require('../shareMemory')
 
 router.post('/payload',(req, res) =>{
   const buffer = req.body
-  console.log(buffer)
    roomData.set(buffer)
 
     res.status(200).json({ok: true})
