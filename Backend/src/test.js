@@ -313,7 +313,7 @@ module.exports = function setupWebSocket(server) {
           JSON.stringify({
             type: "SCENE_UPDATE",
             payload: {
-              encryptedData: Array.from(initalData),
+              encryptedData: initalData,
             },
           }),
         );

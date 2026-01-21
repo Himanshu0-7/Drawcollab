@@ -3,8 +3,8 @@ const WebSocket = require("ws");
 const { randomUUID } = require("crypto");
 
 const url = require("url");
-const { type } = require("os");
-const roomData = require("./shareMemory");
+const roomFrames = require("./roomFrames");
+const { Buffer } = require("buffer");
 module.exports = function setupWebSocket(server) {
   const rooms = new Map();
 
@@ -22,104 +22,49 @@ module.exports = function setupWebSocket(server) {
       ws.roomId = query.room;
       // console.log(roomData.get());
       if (!rooms.has(ws.roomId)) {
-        // console.log("Rooms-Data", roomData.get());
         rooms.set(ws.roomId, {
           clients: new Set(),
-          encryptedData: roomData.get(),
+          encryptedFrame: roomFrames.get(ws.roomId) || null,
         });
       }
 
       wsServer.emit("connection", ws, req);
     });
   });
-  const handleSceneUpdate = (ws, message) => {
-    if (!message.payload?.encryptedData) {
-      console.warn("Empty SCENE_UPDATE ignored");
-      return;
-    }
 
-    const room = rooms.get(ws.roomId);
-    room.encryptedData = message.payload.encryptedData;
-    // console.log(room.encryptedData);
-    
-    broadCasteToRoom(
-      ws.roomId,
-      {
-        type: "SCENE_UPDATE",
-        payload: {
-          encryptedData: room.encryptedData,
-          userId: ws.id,
-        },
-      },
-      ws,
-    );
-  };
-  const handleSceneUpdateDrawing = (ws, message) => {
-    if (!message.payload?.encryptedData) {
-      console.warn("Empty SCENE_UPDATE ignored");
-      return;
-    }
-
-    const room = rooms.get(ws.roomId);
-    room.encryptedData = message.payload.encryptedData;
-    // console.log(room.encryptedData);
-    
-    broadCasteToRoom(
-      ws.roomId,
-      {
-        type: "SCENE_UPDATE_DRAWING",
-        payload: {
-          encryptedData: room.encryptedData,
-          userId: ws.id,
-        },
-      },
-      ws,
-    );
-  };
-
-  const handleMouseLocation = (ws, message) => {
-    broadCasteToRoom(
-      ws.roomId,
-      {
-        type: "MOUSE_LOCATION",
-        payload: {
-          x: message.payload.x,
-          y: message.payload.y,
-          userId: ws.id,
-          userName: ws.userName,
-        },
-      },
-      ws,
-    );
-  };
-  const handleIdleStatus = (ws, message) => {
-    broadCasteToRoom(
-      ws.roomId,
-      {
-        type: "IDLE_STATUS",
-        payload: {
-          idle: message.payload.idle,
-          userId: ws.id,
-        },
-      },
-      ws,
-    );
-  };
-  const broadCasteToRoom = (roomId, message, sender) => {
+  const broadCasteToRoom = (roomId, frame, sender) => {
     const room = rooms.get(roomId);
     if (room) {
       room.clients.forEach((client) => {
         if (client !== sender && client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify(message));
+          client.send(frame);
         }
       });
     }
   };
+  function buildServerFrame(type, payload) {
+    const headerBytes = Buffer.from(JSON.stringify({ type }));
+    const payloadBytes = Buffer.from(JSON.stringify(payload));
+
+    const buffer = Buffer.alloc(4 + headerBytes.length + payloadBytes.length);
+
+    buffer.writeUInt32BE(headerBytes.length, 0);
+    headerBytes.copy(buffer, 4);
+    payloadBytes.copy(buffer, 4 + headerBytes.length);
+
+    return buffer;
+  }
+  /*________________________________________
+
+          Establish Ws Socket Connection 
+  _______________________________________*/
+
   wsServer.on("connection", (ws, req) => {
     /*___________________________________
         
             Retrieve UserName From Request              
             ____________________________________*/
+    console.log("roomId on connect:", ws.roomId);
 
     ws.id = randomUUID();
     console.log("Server Connected");
@@ -129,55 +74,14 @@ module.exports = function setupWebSocket(server) {
       room.clients.add(ws);
       console.log("Room:", ws.roomId);
       console.log("Clients in room:", room.clients.size);
-      //   ws.send(
-      //     JSON.stringify({
-      //       type: "SCENE_UPDATE",
-      //       payload: {
-      //         encryptedData: room.encryptedData,
-      //       },
-      //     }),
-      //   );
-      ws.send(
-        JSON.stringify({
-          type: "SCENE_UPDATE",
-          payload: {
-            encryptedData: room.encryptedData,
-          },
-        }),
-      );
-
-      broadCasteToRoom(
-        ws.roomId,
-        {
-          type: "USER_JOINED",
-          payload: { userId: ws.id },
-        },
-        ws,
-      );
+      if (room.encryptedFrame) {
+        ws.send(room.encryptedFrame);
+      }
     }
+
     ws.on("message", (data) => {
       try {
-        const message = JSON.parse(data);
-        console.log(message.type);
-        switch (message.type) {
-          case "SCENE_UPDATE":
-            handleSceneUpdate(ws, message);
-            break;
-          case "SCENE_UPDATE_DRAWING":
-            handleSceneUpdateDrawing(ws, message);
-            break;
-          case "MOUSE_LOCATION":
-            handleMouseLocation(ws, message);
-            break;
-          case "USER_JOINED":
-            console.log("User-Joined");
-            break;
-          case "IDLE_STATUS":
-            handleIdleStatus(ws, message);
-            break;
-          default:
-            console.log("Unknown Message-Type", message.type);
-        }
+        broadCasteToRoom(ws.roomId, data, ws);
       } catch (error) {
         console.error("Error Parsing Message", error);
       }
@@ -185,19 +89,13 @@ module.exports = function setupWebSocket(server) {
     ws.on("close", () => {
       console.log("Client Disconnect", ws.id);
       if (ws.roomId && rooms.has(ws.roomId)) {
-        rooms.get(ws.roomId).clients.delete(ws);
-        broadCasteToRoom(
-          ws.roomId,
-          {
-            type: "USER_LEFT",
-            payload: {
-              userId: ws.id,
-            },
-          },
-          ws,
-        );
-
-        if (rooms.get(ws.roomId).clients.size === 0) {
+        const room = rooms.get(ws.roomId);
+        room.clients.delete(ws);
+        if (room.clients.size > 0) {
+          const frame = buildServerFrame("USER_LEFT", { userId: ws.id });
+          broadCasteToRoom(ws.roomId, frame, ws);
+        } else {
+          // 3️⃣ Cleanup empty room
           rooms.delete(ws.roomId);
           console.log("Room Deleted", ws.roomId);
         }
