@@ -1,10 +1,17 @@
 import gsap from "gsap";
 import "./Session.css";
-import { useEffect, useRef } from "react";
-import { useGSAP } from "@gsap/react";
-import Sky from "./Animation/Sky";
+import { useEffect } from "react";
 import { CreateRoom } from "./CreateRoom";
-const Session = ({ isloading, roomInfo, setEncrptionKey }) => {
+const Session = ({
+  isloading,
+  roomInfo,
+  setEncrptionKey,
+  userName,
+  setUserName,
+  onStartSession,
+  sessionStatus,
+  setSessionStatus,
+}) => {
   const roomUrl = window.location.href;
   useEffect(() => {
     if (isloading === 1) {
@@ -24,31 +31,48 @@ const Session = ({ isloading, roomInfo, setEncrptionKey }) => {
     <>
       <div className="session-container shared-container">
         <section className="Session-overlay">
-          <Sky></Sky>
+          {/* <Sky></Sky> */}
           <h1>Go Live</h1>
           {roomInfo && (
-            <div className="roomurl-wrapper">
-              <div className="roomurl-overlay">
-                <label id="roomurl-title">Link</label>
-                <input
-                  type="url"
-                  value={roomUrl}
-                  readOnly
-                  className="room-url"
-                />
-              </div>
-              <button
-                className="copyUrl-btn"
-                onClick={() => {
-                  navigator.clipboard.writeText(roomUrl);
+            <div>
+              <label id="name-title">Your Name</label>
+              <input
+                type="text"
+                value={userName}
+                onChange={(e) => {
+                  setUserName(e.target.value);
                 }}
-              >
-                Copy Link
-              </button>
+                className="session-userName"
+              />
+              <div className="whitespace"></div>
+              <div className="roomurl-wrapper">
+                <div className="roomurl-overlay">
+                  <label id="roomurl-title">Link</label>
+                  <input
+                    type="url"
+                    value={roomUrl}
+                    readOnly
+                    className="room-url"
+                  />
+                </div>
+                <button
+                  className="copyUrl-btn"
+                  onClick={() => {
+                    navigator.clipboard.writeText(roomUrl);
+                  }}
+                >
+                  Copy Link
+                </button>
+              </div>
             </div>
           )}
 
-          <CreateRoom setEncrptionKey={setEncrptionKey}></CreateRoom>
+          <CreateRoom
+            setEncrptionKey={setEncrptionKey}
+            onStartSession={onStartSession}
+            sessionStatus={sessionStatus}
+            setSessionStatus={setSessionStatus}
+          ></CreateRoom>
         </section>
       </div>
     </>

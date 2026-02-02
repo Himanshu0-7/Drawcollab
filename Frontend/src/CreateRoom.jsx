@@ -1,8 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 
-export function CreateRoom({ setEncrptionKey }) {
+export function CreateRoom({
+  setEncrptionKey,
+  onStartSession,
+  sessionStatus,
+  setSessionStatus,
+}) {
   const roomIdRef = useRef(crypto.randomUUID());
-  const [sessionActive, setSessionActive] = useState(false);
 
   /*____________________________________
   
@@ -11,6 +15,7 @@ export function CreateRoom({ setEncrptionKey }) {
   ______________________________________*/
 
   const startSession = async () => {
+    onStartSession();
     const cryptoKey = await window.crypto.subtle.generateKey(
       {
         name: "AES-GCM",
@@ -19,30 +24,26 @@ export function CreateRoom({ setEncrptionKey }) {
       true,
       ["encrypt", "decrypt"],
     );
-    const jwk = await window.crypto.subtle.exportKey(
-      "jwk",
-      cryptoKey,
-    );
-    
+    const jwk = await window.crypto.subtle.exportKey("jwk", cryptoKey);
 
     window.location.hash = `#room=${roomIdRef.current},${jwk.k}`;
-    setEncrptionKey(jwk)
-    setSessionActive(true);
+    setEncrptionKey(jwk);
+    setSessionStatus(true);
 
     // exporting webkey to jwk
   };
   const stopSession = () => {
     window.location.hash = "";
-    setSessionActive(false);
+    setSessionStatus(false);
   };
 
   return (
     <>
       <button
-        className={sessionActive ? "stop-session" : "start-session"}
-        onClick={sessionActive ? stopSession : startSession}
+        className={sessionStatus ? "stop-session" : "start-session"}
+        onClick={sessionStatus ? stopSession : startSession}
       >
-        {sessionActive ? "Stop Session" : "Start Session"}
+        {sessionStatus ? "Stop Session" : "Start Session"}
       </button>
     </>
   );

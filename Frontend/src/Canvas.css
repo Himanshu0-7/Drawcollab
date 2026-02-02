@@ -1,0 +1,101 @@
+.zoom-in-btn {
+  position: relative;
+  border: none;
+  z-index: 0;
+  background-color: #c7144d;
+  overflow: visible;
+}
+.zoom-in-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  /* border: 1px solid #ffffff; */
+  border-radius: 10px;
+}
+.zoom-in-btn::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  border: 2px solid #ff2a6d;
+  z-index: -1;
+  border-radius: 10px;
+}
+.zoom-in-btn:hover {
+  transition: box-shadow  300ms ease-in-out;
+  box-shadow:
+    0 0 10px #ff2a6d,
+    0 0 17px #ff2a6d,
+    inset 0 0 18px #ff2a6d;
+}
+.zoom-in-btn.active {
+  background-color: #ff2a6d;
+}
+.zoom-out-btn {
+  position: relative;
+  border: none;
+  z-index: 0;
+  overflow: visible;
+  background-color: #c7144d;
+}
+.zoom-out-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  /* border: 1px solid #ffffff; */
+  border-radius: 10px;
+}
+.zoom-out-btn::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  border: 2px solid #ff2a6d;
+  z-index: -1;
+  border-radius: 10px;
+}
+.zoom-out-btn:hover {
+  transition: box-shadow 300ms ease-in-out;
+  box-shadow:
+    0 0 10px #ff2a6d,
+    0 0 17px #ff2a6d,
+    inset 0 0 18px #ff2a6d;
+}
+.active::before {
+  background-color: #ff2a6d;
+}
+.active::before{
+  background-color: #ff2a6d;
+}
+.zoom-in-btn::before {
+  content: "";
+  position: absolute;
+  background-color: black;
+  inset: 0;
+  z-index: -1;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+  border-radius: inherit;
+}
+.zoom-in-btn:hover::before {
+  transform: scaleX(1);
+}
+.zoom-out-btn::before {
+  content: "";
+  position: absolute;
+  background-color: black;
+  inset: 0;
+  z-index: -1;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+  border-radius: inherit;
+}
+.zoom-out-btn:hover::before {
+  transform: scaleX(1);
+}

@@ -14,8 +14,3 @@ body {
   align-items: center; */
 }
 
-.Canvas-wrapper {
-  position: relative;
-  height: 200vh;
-  width: 200vw;
-}

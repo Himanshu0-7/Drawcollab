@@ -5,6 +5,7 @@ const { randomUUID } = require("crypto");
 const url = require("url");
 const roomFrames = require("./roomFrames");
 const { Buffer } = require("buffer");
+
 module.exports = function setupWebSocket(server) {
   const rooms = new Map();
 
@@ -62,23 +63,33 @@ module.exports = function setupWebSocket(server) {
   wsServer.on("connection", (ws, req) => {
     /*___________________________________
         
-            Retrieve UserName From Request              
-            ____________________________________*/
+        Retrieve UserName From Request              
+    ____________________________________*/
     console.log("roomId on connect:", ws.roomId);
 
     ws.id = randomUUID();
+
     console.log("Server Connected");
+
     if (ws.roomId && rooms.has(ws.roomId)) {
       const room = rooms.get(ws.roomId);
-
       room.clients.add(ws);
-      console.log("Room:", ws.roomId);
-      console.log("Clients in room:", room.clients.size);
+
+      // 🔹 Notify others in the room
+      // ws.send(
+      //   JSON.stringify({
+      //     type: "USER_JOINED",
+      //     payload: { userName: ws.userName },
+      //   }),
+      // );
+
+      // 🔹 Send existing canvas frame
       if (room.encryptedFrame) {
         ws.send(room.encryptedFrame);
       }
-    }
 
+      console.log("Clients in room:", room.clients.size);
+    }
     ws.on("message", (data) => {
       try {
         broadCasteToRoom(ws.roomId, data, ws);
@@ -95,7 +106,6 @@ module.exports = function setupWebSocket(server) {
           const frame = buildServerFrame("USER_LEFT", { userId: ws.id });
           broadCasteToRoom(ws.roomId, frame, ws);
         } else {
-          // 3️⃣ Cleanup empty room
           rooms.delete(ws.roomId);
           console.log("Room Deleted", ws.roomId);
         }

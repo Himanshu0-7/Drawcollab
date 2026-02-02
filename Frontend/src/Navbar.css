@@ -20,32 +20,52 @@
 
 #share-button {
   position: relative;
-  font-family: "Poppins Font_medium";
+  font-family: "DynaPuff Font_regular";
   font-size: 1rem;
-  background-color: rgb(0, 41, 48);
-  border: 1px solid black;
-  color: white;
+  background-color: #c7144d;
+  /* border: 1px solid #ff2a6d; */
+  border: none;
+  color: #fff;
   width: 100px;
-  border-radius: 10px;
+  border-radius: 20px;
   height: 40px;
   overflow: hidden;
   z-index: 1;
   margin-right: 20px;
   letter-spacing: 2px;
+  z-index: 0;
+  overflow: visible;
 }
 #share-button::before {
   content: "";
   position: absolute;
+  background-color: black;
   inset: 0;
-  background-color: white;
+  z-index: -1;
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.4s ease;
-  z-index: -1;
+  border-radius: inherit;
 }
 #share-button:hover::before {
   transform: scaleX(1);
 }
+
+/* Outer border */
+#share-button::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  /* border: 2px solid #ff2a6d; */
+  z-index: -1;
+}
+
 #share-button:hover {
-  color: black;
+  color: #12bfc8;
+  transition: all 300ms ease-in-out;
+  box-shadow:
+    0 0 10px #ff2a6d,
+    0 0 17px #ff2a6d,
+    inset 0 0 18px #ff2a6d;
 }
