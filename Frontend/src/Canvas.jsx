@@ -472,6 +472,7 @@ ______________________________________*/
     });
 
     const ws = new WebSocket(`ws://localhost:3000/ws?room=${roomInfo.roomId}`);
+      
     ws.binaryType = "arraybuffer";
     ws.onopen = () => {
       console.log("ws connected to roomid", roomInfo.roomId);
