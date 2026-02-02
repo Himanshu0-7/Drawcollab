@@ -8,4 +8,6 @@ const server = http.createServer(app);
 
 setupWebSocket(server);
 
-server.listen(process.env.PORT, () => {});
+server.listen(process.env.PORT, () => {
+  console.log("Server is running in", console.log(process.env.ORIGIN_URL));
+});
